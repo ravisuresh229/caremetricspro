@@ -1,0 +1,46 @@
+# Virtual environments
+venv/
+backend/venv/
+*/venv/
+
+# Node modules
+node_modules/
+
+# Backend folder (not needed for Vercel deployment)
+backend/
+
+# Large CSV files (data is fetched from S3)
+*.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+build/
+dist/
+
+# Test files
+test_vercel_functions.py 
