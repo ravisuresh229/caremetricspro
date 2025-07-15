@@ -58,7 +58,7 @@ const AnimatedMetric = ({ value, duration = 1000, prefix = '', suffix = '%' }) =
     };
     
     requestAnimationFrame(updateValue);
-  }, [value]);
+  }, [value, displayValue, duration]);
   
   return (
     <span className="tabular-nums">
