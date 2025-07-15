@@ -10,6 +10,11 @@ node_modules/
 backend/
 api/
 
+# Python files (not needed for React frontend)
+*.py
+streamlit_app.py
+test_vercel_functions.py
+
 # Large CSV files (data is fetched from S3)
 *.csv
 
