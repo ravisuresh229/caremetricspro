@@ -10,8 +10,7 @@ node_modules/
 backend/
 api/
 
-# Python files (not needed for React frontend)
-*.py
+# Python files (not needed for React frontend) - be specific
 streamlit_app.py
 test_vercel_functions.py
 
