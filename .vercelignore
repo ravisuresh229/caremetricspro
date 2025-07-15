@@ -8,6 +8,7 @@ node_modules/
 
 # Backend folder (not needed for Vercel deployment)
 backend/
+api/
 
 # Large CSV files (data is fetched from S3)
 *.csv
