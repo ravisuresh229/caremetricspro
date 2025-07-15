@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 // Animated Number Component for smooth number transitions
-const AnimatedMetric = ({ value, duration = 1000 }) => {
+const AnimatedMetric = ({ value, duration = 1000, prefix = '', suffix = '%' }) => {
   const [displayValue, setDisplayValue] = useState(0);
   
   useEffect(() => {
@@ -62,7 +62,7 @@ const AnimatedMetric = ({ value, duration = 1000 }) => {
   
   return (
     <span className="tabular-nums">
-      {displayValue.toFixed(1)}%
+      {prefix}{displayValue.toFixed(1)}{suffix}
     </span>
   );
 };
@@ -415,6 +415,19 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
     });
   };
 
+  // Generate sample trend data for sparklines
+  const generateTrendData = (currentValue) => {
+    const data = [];
+    const variance = 5; // Max variance from current value
+    for (let i = 0; i < 12; i++) {
+      const randomVariance = (Math.random() - 0.5) * 2 * variance;
+      const value = currentValue + randomVariance - (variance * 0.5) + (i * variance * 0.05);
+      data.push(Math.max(0, Math.min(100, value)));
+    }
+    data.push(currentValue); // End with current value
+    return data;
+  };
+
   const generateInsights = () => {
     if (!selectedHospital || !hospitalData[selectedHospital]) return [];
     
@@ -488,12 +501,15 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
     return null;
   };
 
-  const InsightCard = ({ insight }) => {
+  const InsightCard = ({ insight, delay = 0 }) => {
     const Icon = insight.icon;
     return (
-      <div className={`insight-card border-l-4 border-${insight.color}-500`}>
+      <MagneticCard 
+        className={`insight-card border-l-4 border-${insight.color}-500 animate-in fade-in slide-in-from-top-1`}
+        style={{ animationDelay: `${delay}ms` }}
+      >
         <div className="flex items-start space-x-4">
-          <div className={`w-10 h-10 bg-gradient-to-br from-${insight.color}-500 to-${insight.color}-600 rounded-xl flex items-center justify-center flex-shrink-0`}>
+          <div className={`w-10 h-10 bg-gradient-to-br from-${insight.color}-500 to-${insight.color}-600 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 hover:scale-110`}>
             <Icon className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
@@ -501,7 +517,7 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
             <p className="text-sm text-executive-600 dark:text-executive-300 leading-relaxed">{insight.message}</p>
           </div>
         </div>
-      </div>
+      </MagneticCard>
     );
   };
 
@@ -646,11 +662,11 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
               </div>
               <button
                 onClick={() => setShowHospitalModal(true)}
-                className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300 transition-all duration-300"
+                className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300 transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-md"
               >
                 <Building2 className="w-4 h-4" />
                 <span className="font-medium">{selectedHospital || 'Select Hospital'}</span>
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" />
               </button>
             </div>
             
@@ -731,10 +747,10 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
                             : [...selectedMetrics, metric]
                         );
                       }}
-                      className={`min-w-max whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200 flex items-center space-x-2
+                      className={`min-w-max whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium transition-all duration-300 flex items-center space-x-2 transform hover:scale-105 active:scale-95
                         ${selectedMetrics.includes(metric)
-                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg'
-                          : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100 dark:bg-executive-800 dark:text-executive-300 dark:border-executive-600 dark:hover:bg-executive-700'}
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg animate-in fade-in scale-105'
+                          : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:shadow-md dark:bg-executive-800 dark:text-executive-300 dark:border-executive-600 dark:hover:bg-executive-700'}
                       `}
                     >
                       {/* Rotating icons for visual variety */}
@@ -886,7 +902,10 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
                         <tr key={index} className="border-b border-executive-100 dark:border-executive-800 hover:bg-executive-50 dark:hover:bg-executive-800/50 transition-colors duration-200">
                           <td className="py-3 px-4 text-executive-700 dark:text-executive-300 truncate max-w-xs">{row.name}</td>
                           <td className="py-3 px-4 text-right font-semibold text-executive-900 dark:text-white">
-                            <AnimatedMetric value={row.hospital} />
+                            <MetricWithSparkline 
+                              metric={row.hospital} 
+                              data={generateTrendData(parseFloat(row.hospital))} 
+                            />
                           </td>
                           <td className="py-3 px-4 text-right text-executive-600 dark:text-executive-400">
                             <AnimatedMetric value={row.state} />
@@ -897,12 +916,12 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
                           <td className={`py-3 px-4 text-right font-medium ${
                             parseFloat(row.vsState) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                           }`}>
-                            {parseFloat(row.vsState) >= 0 ? '+' : ''}<AnimatedMetric value={Math.abs(row.vsState)} />
+                            <AnimatedMetric value={Math.abs(row.vsState)} prefix={parseFloat(row.vsState) >= 0 ? '+' : '-'} />
                           </td>
                           <td className={`py-3 px-4 text-right font-medium ${
                             parseFloat(row.vsNational) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                           }`}>
-                            {parseFloat(row.vsNational) >= 0 ? '+' : ''}<AnimatedMetric value={Math.abs(row.vsNational)} />
+                            <AnimatedMetric value={Math.abs(row.vsNational)} prefix={parseFloat(row.vsNational) >= 0 ? '+' : '-'} />
                           </td>
                         </tr>
                       ))}
@@ -939,7 +958,7 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
               </MagneticCard>
 
               {/* Report Generator */}
-              <div className="executive-card p-4">
+              <MagneticCard className="executive-card p-4">
                 <h3 className="text-lg font-semibold text-executive-900 dark:text-white mb-4">Report Generator</h3>
                 <div className="space-y-3">
                   <button className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:hover:bg-emerald-800/50 text-emerald-700 dark:text-emerald-300 transition-all duration-300">
@@ -951,10 +970,10 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
                     <span>Report Settings</span>
                   </button>
                 </div>
-              </div>
+              </MagneticCard>
 
               {/* Insights Panel */}
-              <div className="executive-card p-4">
+              <MagneticCard className="executive-card p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-executive-900 dark:text-white">Insights</h3>
                   <button
@@ -987,12 +1006,12 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
                     {/* Insights Content */}
                     <div className="space-y-3 max-h-96 overflow-y-auto">
                       {insights.map((insight, index) => (
-                        <InsightCard key={index} insight={insight} />
+                        <InsightCard key={index} insight={insight} delay={index * 100} />
                       ))}
                     </div>
                   </div>
                 )}
-              </div>
+              </MagneticCard>
             </div>
           </div>
         </div>
