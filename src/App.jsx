@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import LandingPage from './components/LandingPage';
 import ModernDashboard from './components/ModernDashboard';
 
 const App = () => {
-  const [showDashboard, setShowDashboard] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
 
   // Check for saved dark mode preference
   useEffect(() => {
@@ -24,29 +22,13 @@ const App = () => {
     }
   }, [darkMode]);
 
-  const handleEnterDashboard = () => {
-    setShowDashboard(true);
-  };
-
-  const handleBackToLanding = () => {
-    setShowDashboard(false);
-  };
-
   return (
     <div className={`App ${darkMode ? 'dark' : ''}`}>
-      {showDashboard ? (
-        <ModernDashboard 
-          onBackToLanding={handleBackToLanding}
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-        />
-      ) : (
-        <LandingPage 
-          onEnterDashboard={handleEnterDashboard}
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-        />
-      )}
+      <ModernDashboard 
+        onBackToLanding={() => {}}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+      />
     </div>
   );
 };

@@ -140,6 +140,9 @@ def get_all_hospitals_data():
             else:
                 clean_info[k] = str(v) if v is not None else ''
         
+        # Add state information
+        clean_info['state'] = state
+        
         # Build metrics with proper structure
         metrics = {}
         for col in METRIC_IDS.values():
