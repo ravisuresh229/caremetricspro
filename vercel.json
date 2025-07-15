@@ -1,8 +1,4 @@
 {
-  "framework": "create-react-app",
-  "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "installCommand": "npm install",
   "functions": {
     "api/*.py": {
       "runtime": "@vercel/python@3.0.0",
