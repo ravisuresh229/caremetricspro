@@ -1,20 +1,14 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "build",
   "functions": {
     "api/*.py": {
-      "runtime": "@vercel/python@3.0.0",
+      "runtime": "@vercel/python@3.1.0",
       "maxDuration": 30
     }
   },
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 } 
