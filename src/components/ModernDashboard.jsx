@@ -33,6 +33,122 @@ import {
   ChevronDown
 } from 'lucide-react';
 
+// Animated Number Component for smooth number transitions
+const AnimatedMetric = ({ value, duration = 1000 }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  
+  useEffect(() => {
+    const startTime = Date.now();
+    const startValue = displayValue;
+    const endValue = parseFloat(value);
+    
+    const updateValue = () => {
+      const now = Date.now();
+      const progress = Math.min((now - startTime) / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const current = startValue + (endValue - startValue) * easeOutQuart;
+      
+      setDisplayValue(current);
+      
+      if (progress < 1) {
+        requestAnimationFrame(updateValue);
+      }
+    };
+    
+    requestAnimationFrame(updateValue);
+  }, [value]);
+  
+  return (
+    <span className="tabular-nums">
+      {displayValue.toFixed(1)}%
+    </span>
+  );
+};
+
+// Magnetic Hover Effect for Cards
+const MagneticCard = ({ children, className = '' }) => {
+  const cardRef = useRef(null);
+  const [transform, setTransform] = useState('');
+  
+  const handleMouseMove = (e) => {
+    const card = cardRef.current;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    
+    const angle = Math.atan2(y, x);
+    const distance = Math.min(Math.sqrt(x * x + y * y), 40);
+    const translateX = Math.cos(angle) * distance * 0.1;
+    const translateY = Math.sin(angle) * distance * 0.1;
+    
+    setTransform(`translate(${translateX}px, ${translateY}px)`);
+  };
+  
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setTransform('')}
+      className={`transition-transform duration-200 ease-out ${className}`}
+      style={{ transform }}
+    >
+      {children}
+    </div>
+  );
+};
+
+// Sparkline Component
+const Sparkline = ({ data }) => {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min;
+  const width = 100;
+  const height = 30;
+  
+  const points = data.map((value, index) => {
+    const x = (index / (data.length - 1)) * width;
+    const y = height - ((value - min) / range) * height;
+    return `${x},${y}`;
+  }).join(' ');
+  
+  return (
+    <svg width={width} height={height} className="w-full h-full">
+      <polyline
+        points={points}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        className="text-indigo-400"
+      />
+    </svg>
+  );
+};
+
+// Metric With Sparkline on Hover
+const MetricWithSparkline = ({ metric, data }) => {
+  const [showSparkline, setShowSparkline] = useState(false);
+  
+  return (
+    <div 
+      className="relative inline-block"
+      onMouseEnter={() => setShowSparkline(true)}
+      onMouseLeave={() => setShowSparkline(false)}
+    >
+      <AnimatedMetric value={metric} />
+      
+      {showSparkline && data && (
+        <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 w-32 h-12 
+                        bg-black/80 backdrop-blur-sm rounded-lg p-2 z-10
+                        animate-in fade-in slide-in-from-top-1">
+          <Sparkline data={data} />
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
   const [selectedHospital, setSelectedHospital] = useState('');
   const [selectedMetrics, setSelectedMetrics] = useState([]);
@@ -767,20 +883,26 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
                     </thead>
                     <tbody>
                       {chartData.map((row, index) => (
-                        <tr key={index} className="border-b border-executive-100 dark:border-executive-800">
+                        <tr key={index} className="border-b border-executive-100 dark:border-executive-800 hover:bg-executive-50 dark:hover:bg-executive-800/50 transition-colors duration-200">
                           <td className="py-3 px-4 text-executive-700 dark:text-executive-300 truncate max-w-xs">{row.name}</td>
-                          <td className="py-3 px-4 text-right font-semibold text-executive-900 dark:text-white">{row.hospital}%</td>
-                          <td className="py-3 px-4 text-right text-executive-600 dark:text-executive-400">{row.state}%</td>
-                          <td className="py-3 px-4 text-right text-executive-600 dark:text-executive-400">{row.national}%</td>
+                          <td className="py-3 px-4 text-right font-semibold text-executive-900 dark:text-white">
+                            <AnimatedMetric value={row.hospital} />
+                          </td>
+                          <td className="py-3 px-4 text-right text-executive-600 dark:text-executive-400">
+                            <AnimatedMetric value={row.state} />
+                          </td>
+                          <td className="py-3 px-4 text-right text-executive-600 dark:text-executive-400">
+                            <AnimatedMetric value={row.national} />
+                          </td>
                           <td className={`py-3 px-4 text-right font-medium ${
                             parseFloat(row.vsState) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                           }`}>
-                            {parseFloat(row.vsState) >= 0 ? '+' : ''}{row.vsState}%
+                            {parseFloat(row.vsState) >= 0 ? '+' : ''}<AnimatedMetric value={Math.abs(row.vsState)} />
                           </td>
                           <td className={`py-3 px-4 text-right font-medium ${
                             parseFloat(row.vsNational) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                           }`}>
-                            {parseFloat(row.vsNational) >= 0 ? '+' : ''}{row.vsNational}%
+                            {parseFloat(row.vsNational) >= 0 ? '+' : ''}<AnimatedMetric value={Math.abs(row.vsNational)} />
                           </td>
                         </tr>
                       ))}
@@ -795,7 +917,7 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
           <div className="col-span-4">
             <div className="sticky top-8 space-y-6">
               {/* Export Actions */}
-              <div className="executive-card p-4">
+              <MagneticCard className="executive-card p-4">
                 <h3 className="text-lg font-semibold text-executive-900 dark:text-white mb-4">Export & Share</h3>
                 <div className="space-y-3">
                   <button
@@ -814,7 +936,7 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
                     <span>Email Report</span>
                   </button>
                 </div>
-              </div>
+              </MagneticCard>
 
               {/* Report Generator */}
               <div className="executive-card p-4">
