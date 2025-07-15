@@ -8,7 +8,7 @@ node_modules/
 
 # Backend folder (not needed for Vercel deployment)
 backend/
-api/
+# api/   # <-- Allow Vercel to deploy Python API endpoints
 
 # Python files (not needed for React frontend) - be specific
 streamlit_app.py
