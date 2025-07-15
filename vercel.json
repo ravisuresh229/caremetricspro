@@ -7,16 +7,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://caremetricspro-production.up.railway.app/api/:path*"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 } 
