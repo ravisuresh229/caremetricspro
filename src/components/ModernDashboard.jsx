@@ -395,7 +395,12 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
 
   // Helper function to truncate to 1 decimal place
   const truncateToDecimal = (value) => {
-    return typeof value === 'number' ? value.toFixed(1) : value;
+    if (typeof value === 'number') {
+      return value.toFixed(1);
+    }
+    // If it's a string, try to parse and format it
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? value : parsed.toFixed(1);
   };
 
   const getMetricData = () => {
@@ -703,9 +708,16 @@ const ModernDashboard = ({ onBackToLanding, darkMode, setDarkMode }) => {
           <div className="col-span-8 space-y-6">
             {/* Hospital Title and View Controls */}
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-executive-900 dark:text-white truncate">
-                {selectedHospital} Performance
-              </h2>
+              <div>
+                <h2 className="text-2xl font-bold text-executive-900 dark:text-white truncate">
+                  {selectedHospital} Performance
+                </h2>
+                {(hospitalData[selectedHospital]?.info?.state || hospitalData[selectedHospital]?.info?.State) && (
+                  <p className="text-sm text-executive-600 dark:text-executive-400 mt-1">
+                    {hospitalData[selectedHospital].info.state || hospitalData[selectedHospital].info.State}
+                  </p>
+                )}
+              </div>
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setViewMode('chart')}
