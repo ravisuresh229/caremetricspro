@@ -15,7 +15,7 @@ streamlit_app.py
 test_vercel_functions.py
 
 # Python requirements (for backend, not frontend)
-requirements.txt
+/requirements.txt
 
 # Large CSV files (data is fetched from S3)
 *.csv
